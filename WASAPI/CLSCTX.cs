@@ -1,0 +1,12 @@
+namespace CMusic.WASAPI;
+
+
+public abstract class CLSCTX
+{
+  public const uint CLSCTX_INPROC_SERVER = 0x1;
+  public const uint CLSCTX_INPROC_HANDLER = 0x2;
+  public const uint CLSCTX_LOCAL_SERVER = 0x4;
+  public const uint CLSCTX_REMOTE_SERVER = 0x10;
+  public const uint CLSCTX_ALL = CLSCTX_INPROC_SERVER | CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER;
+  public const uint CLSCTX_SERVER = CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER | CLSCTX_REMOTE_SERVER;
+}

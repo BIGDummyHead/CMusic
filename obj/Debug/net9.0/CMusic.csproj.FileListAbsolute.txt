@@ -1,0 +1,14 @@
+C:\Users\shawn\OneDrive\Desktop\CMusic\bin\Debug\net9.0\CMusic.exe
+C:\Users\shawn\OneDrive\Desktop\CMusic\bin\Debug\net9.0\CMusic.deps.json
+C:\Users\shawn\OneDrive\Desktop\CMusic\bin\Debug\net9.0\CMusic.runtimeconfig.json
+C:\Users\shawn\OneDrive\Desktop\CMusic\bin\Debug\net9.0\CMusic.dll
+C:\Users\shawn\OneDrive\Desktop\CMusic\bin\Debug\net9.0\CMusic.pdb
+C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\CMusic.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\CMusic.AssemblyInfoInputs.cache
+C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\CMusic.AssemblyInfo.cs
+C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\CMusic.csproj.CoreCompileInputs.cache
+C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\CMusic.dll
+C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\refint\CMusic.dll
+C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\CMusic.pdb
+C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\CMusic.genruntimeconfig.cache
+C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\ref\CMusic.dll
