@@ -81,10 +81,10 @@ public static class Tools
             return HRESULT.S_OK;
 
         HRESULT hr = GetPreferredFormat(client, out WAVEFORMATEX preferredFormat);
-
         if (hr != HRESULT.S_OK)
             return hr;
 
+System.Console.WriteLine(modifiedFormat);
         preferredFormat.wFormatTag = modifiedFormat.wFormatTag;
         preferredFormat.cbSize = modifiedFormat.cbSize;
 
@@ -95,6 +95,8 @@ public static class Tools
         preferredFormat.nAvgBytesPerSec = preferredFormat.nSamplesPerSec * preferredFormat.nBlockAlign;
 
         modifiedFormat = preferredFormat;
+System.Console.WriteLine(modifiedFormat);
+
 
         return IsSupported(client, ref modifiedFormat) ? HRESULT.S_OK : HRESULT.E_INVALIDARG;
     }

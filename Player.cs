@@ -71,11 +71,9 @@ public class Player : IPlayer
 
     public Stream CurrentAudioStream { get; set; }
 
-    public Queue<Stream> QueuedAudioStreams { get;  set; } = new Queue<Stream>();
+    public Queue<Stream> QueuedAudioStreams { get; set; } = new Queue<Stream>();
 
-    public Stack<Stream> PreviouslyPlayedStream { get;  set; } = new Stack<Stream>();
-
-    private int dataOffset = 0;
+    public Stack<Stream> PreviouslyPlayedStream { get; set; } = new Stack<Stream>();
 
 
     public bool Pause()
@@ -104,6 +102,7 @@ public class Player : IPlayer
 
     public bool Previous()
     {
+        throw new NotImplementedException("This feature is currently not implemented, due to non-seekable streaming");
         if (PreviouslyPlayedStream.Count == 0)
             return false;
 
@@ -115,69 +114,68 @@ public class Player : IPlayer
         return true;
     }
 
+    const uint REFTIMES_PER_SEC = 10000000;
+    const uint REFTIMES_PER_MILLISEC = 10000;
     public async Task<PlayerResult> Play(CancellationToken cancellationToken = default)
     {
         if (CurrentAudioStream == null && !Next())
             throw new Exception("Nothing left to play in Queue");
 
-        HRESULT hr = audioClient.Start();
-        if (hr != HRESULT.S_OK)
-            throw new Exception($"Could not start the player: 0x{hr:X}");
-
-        hr = audioClient.GetBufferSize(out uint bufferSize);
+        HRESULT hr = audioClient.GetBufferSize(out uint numBufferFrames);
         if (hr != HRESULT.S_OK)
             throw new Exception($"Could not get player's buffer: 0x{hr:X}");
 
-        while (dataOffset < CurrentAudioStream.Length && !cancellationToken.IsCancellationRequested)
+        uint actualHNSDuration = REFTIMES_PER_SEC * numBufferFrames / Format.nSamplesPerSec;
+
+        if (audioClient.Start() != HRESULT.S_OK)
+            throw new Exception("Could not start the audio player...");
+
+        while (!cancellationToken.IsCancellationRequested)
         {
-            //gets the amount of frames already in the buffer...
-            hr = audioClient.GetCurrentPadding(out uint padding);
+            Thread.Sleep((int)(actualHNSDuration / REFTIMES_PER_MILLISEC / 2));
 
-            if (hr != HRESULT.S_OK)
-                throw new Exception($"Abort. Failed to get the padding: 0x{hr:X}");
+            audioClient.GetCurrentPadding(out uint numPaddingFrames);
 
-            //take the actual buffer size and remove the frames already inside of the buffer
-            uint actualFramesAvaiable = bufferSize - padding;
-            if (actualFramesAvaiable == 0)
-                continue; //just keep going until we are given some
+            uint numFramesRequested = numBufferFrames - numPaddingFrames;
+            if (numFramesRequested == 0)
+                continue;
 
-            uint bytesPerFrame = format.nBlockAlign;
-            uint copyAmnt = Math.Min(actualFramesAvaiable * bytesPerFrame, (uint)(CurrentAudioStream.Length - dataOffset));
-            uint countWrite = copyAmnt / bytesPerFrame;
-
-            hr = audioRenderClient.GetBuffer(countWrite, out IntPtr bufferPtr);
-            if (hr != HRESULT.S_OK)
-                throw new Exception($"Could not get buffer to write: 0x{hr:X} , point to {bufferPtr}");
-            else if (bufferPtr == IntPtr.Zero)
-                break; //do not throw an error for this. It happens sometimes
-
-            //finally to the easier steps, copy to the buffer and release.
-
-            //copy raw pcm wav data (+ offset) to the buffer pointer with the amnt 
-
-            byte[] bufferData = new byte[copyAmnt];
-
-            CurrentAudioStream.Position = dataOffset;
-
-            _ = await CurrentAudioStream.ReadAsync(bufferData, 0, (int)copyAmnt, cancellationToken);
-
-            if (cancellationToken.IsCancellationRequested)
+            if (audioRenderClient.GetBuffer(numFramesRequested, out IntPtr ptrBuffer) != HRESULT.S_OK || ptrBuffer == IntPtr.Zero)
                 break;
 
-            Marshal.Copy(bufferData, 0, bufferPtr, bufferData.Length);
+            int copyingBytes = (int)numFramesRequested * format.nBlockAlign;
+            byte[] audioBuffer = new byte[copyingBytes];
 
-            audioRenderClient.ReleaseBuffer(countWrite, 0);
+            int totalRead = 0;
+            while (totalRead < copyingBytes)
+            {
+                int audioRead = await CurrentAudioStream.ReadAsync(audioBuffer, totalRead, copyingBytes - totalRead);
 
-            dataOffset += (int)copyAmnt;
+                if (audioRead == 0)
+                    break;
+
+                totalRead += audioRead;
+            }
+
+            Marshal.Copy(audioBuffer, 0, ptrBuffer, totalRead);
+
+            uint framesWritten = (uint)(totalRead / format.nBlockAlign);
+            audioRenderClient.ReleaseBuffer(framesWritten, 0);
+
+            if(totalRead <= 0)
+                break;
         }
 
+        Thread.Sleep((int)(actualHNSDuration / REFTIMES_PER_MILLISEC / 2));
         audioClient.Stop();
         return cancellationToken.IsCancellationRequested ? PlayerResult.Cancelled : PlayerResult.Finished;
     }
 
     public bool Restart()
     {
-        dataOffset = 0;
+        if(CurrentAudioStream.CanSeek)
+            CurrentAudioStream.Position = 0;
+            
         return true;
     }
 
@@ -188,6 +186,4 @@ public class Player : IPlayer
         Marshal.ReleaseComObject(this.audioClient);
         CurrentAudioStream.Dispose();
     }
-
-
 }

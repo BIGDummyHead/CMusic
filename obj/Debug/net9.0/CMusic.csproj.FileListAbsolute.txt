@@ -12,3 +12,4 @@ C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\refint\CMusic.dll
 C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\CMusic.pdb
 C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\CMusic.genruntimeconfig.cache
 C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\ref\CMusic.dll
+C:\Users\shawn\OneDrive\Desktop\CMusic\obj\Debug\net9.0\CMusic.sourcelink.json
